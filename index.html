@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GetChartered · Admin Dashboard</title>
+<style>
+/* ── Colour roles ─────────────────────────────────────────────────── */
+:root {
+  color-scheme: light;
+  --surface-page:   #f9f9f7;
+  --surface-card:   #fcfcfb;
+  --ink-primary:    #0b0b0b;
+  --ink-secondary:  #52514e;
+  --ink-muted:      #898781;
+  --grid:           #e1e0d9;
+  --baseline:       #c3c2b7;
+  --border:         rgba(11,11,11,0.10);
+  --cat-1: #2a78d6;
+  --cat-2: #eb6834;
+  --cat-3: #1baf7a;
+  --cat-4: #eda100;
+  --seq-100: #cde2fb; --seq-250: #86b6ef;
+  --seq-400: #3987e5; --seq-600: #184f95;
+  --good:     #006300;
+  --bad:      #d03b3b;
+  --delta-up:   #006300;
+  --delta-down: #d03b3b;
+  --deemph: #c3c2b7;
+  --focus-ring: #2a78d6;
+  --btn-bg: #f0efec;
+  --btn-bg-active: #e1e0d9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface-page:#0d0d0d; --surface-card:#1a1a19;
+    --ink-primary:#ffffff; --ink-secondary:#c3c2b7; --ink-muted:#898781;
+    --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,0.10);
+    --cat-1:#3987e5; --cat-2:#d95926; --cat-3:#199e70; --cat-4:#c98500;
+    --seq-100:#0d366b; --seq-250:#184f95; --seq-400:#3987e5; --seq-600:#86b6ef;
+    --good:#0ca30c; --bad:#e66767;
+    --delta-up:#0ca30c; --delta-down:#e66767;
+    --deemph:#383835; --btn-bg:#2c2c2a; --btn-bg-active:#383835;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-page:#0d0d0d; --surface-card:#1a1a19;
+  --ink-primary:#ffffff; --ink-secondary:#c3c2b7; --ink-muted:#898781;
+  --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,0.10);
+  --cat-1:#3987e5; --cat-2:#d95926; --cat-3:#199e70; --cat-4:#c98500;
+  --seq-100:#0d366b; --seq-250:#184f95; --seq-400:#3987e5; --seq-600:#86b6ef;
+  --good:#0ca30c; --bad:#e66767;
+  --delta-up:#0ca30c; --delta-down:#e66767;
+  --deemph:#383835; --btn-bg:#2c2c2a; --btn-bg-active:#383835;
+}
+
+/* ── Reset & base ─────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--surface-page); color:var(--ink-primary);
+  line-height:1.5; padding:24px 16px; max-width:1120px; margin:0 auto;
+}
+
+/* ── Auth banner ──────────────────────────────────────────────────── */
+#auth-banner{text-align:center;padding:80px 16px}
+#auth-banner h1{font-size:24px;font-weight:600;margin-bottom:8px}
+#auth-banner p{color:var(--ink-secondary);margin-bottom:24px}
+#auth-banner button{
+  background:var(--cat-1);color:#fff;border:none;border-radius:8px;
+  padding:12px 32px;font-size:15px;font-weight:500;cursor:pointer;
+}
+#auth-banner .auth-loading{color:var(--ink-muted);font-size:14px}
+
+/* ── Header ───────────────────────────────────────────────────────── */
+.dash-header{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin-bottom:24px}
+.dash-header h1{font-size:22px;font-weight:600}
+.dash-header .subtitle{font-size:14px;color:var(--ink-muted)}
+.user-info{margin-left:auto;font-size:13px;color:var(--ink-muted);display:flex;align-items:center;gap:12px}
+.logout-btn{
+  background:var(--btn-bg);border:1px solid var(--border);border-radius:6px;
+  padding:4px 12px;font-size:12px;color:var(--ink-secondary);cursor:pointer;font-family:inherit;
+}
+
+/* ── Filter row ───────────────────────────────────────────────────── */
+.filter-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:24px}
+.filter-btn{
+  background:var(--btn-bg);border:1px solid var(--border);border-radius:6px;
+  padding:6px 14px;font-size:13px;color:var(--ink-secondary);cursor:pointer;
+  font-weight:500;transition:background .12s;font-family:inherit;
+}
+.filter-btn:hover{background:var(--btn-bg-active)}
+.filter-btn.active{background:var(--cat-1);color:#fff;border-color:var(--cat-1)}
+.custom-dates{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--ink-secondary)}
+.custom-dates input[type="date"]{
+  background:var(--btn-bg);border:1px solid var(--border);border-radius:6px;
+  padding:5px 8px;font-size:13px;color:var(--ink-primary);font-family:inherit;
+}
+.refresh-btn{
+  background:var(--cat-1);color:#fff;border:none;border-radius:6px;
+  padding:6px 16px;font-size:13px;font-weight:500;cursor:pointer;margin-left:auto;font-family:inherit;
+}
+.refresh-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── Loading ──────────────────────────────────────────────────────── */
+.loading-overlay{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:var(--surface-card);opacity:.7;border-radius:12px;z-index:2;
+}
+.spinner{
+  width:24px;height:24px;border:3px solid var(--grid);
+  border-top-color:var(--cat-1);border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── KPI tiles ────────────────────────────────────────────────────── */
+.kpi-row{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:16px;margin-bottom:24px;
+}
+.stat-tile{
+  background:var(--surface-card);border:1px solid var(--border);
+  border-radius:12px;padding:20px 20px 16px;position:relative;
+}
+.stat-tile .label{
+  font-size:13px;color:var(--ink-muted);font-weight:500;
+  text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;
+}
+.stat-tile .value{font-size:32px;font-weight:600;line-height:1.15}
+.stat-tile .delta{font-size:13px;font-weight:500;margin-top:4px}
+.delta.up{color:var(--delta-up)} .delta.down{color:var(--delta-down)}
+
+/* ── Chart cards ──────────────────────────────────────────────────── */
+.chart-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));
+  gap:16px;margin-bottom:24px;
+}
+@media(max-width:520px){.chart-grid{grid-template-columns:1fr}}
+.chart-card{
+  background:var(--surface-card);border:1px solid var(--border);
+  border-radius:12px;padding:20px;position:relative;min-height:280px;
+}
+.chart-card .card-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px}
+.chart-card .card-title{font-size:15px;font-weight:600}
+.table-toggle{
+  font-size:12px;color:var(--cat-1);background:none;border:none;
+  cursor:pointer;text-decoration:underline;font-family:inherit;
+}
+
+/* ── SVG ──────────────────────────────────────────────────────────── */
+.chart-svg{width:100%;display:block;overflow:visible}
+.chart-svg text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;fill:var(--ink-muted);font-size:11px}
+.chart-svg .axis-label{fill:var(--ink-muted);font-size:11px}
+.chart-svg .grid-line{stroke:var(--grid);stroke-width:1}
+.chart-svg .axis-line{stroke:var(--baseline);stroke-width:1}
+.chart-svg .data-line{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chart-svg .data-dot{stroke:var(--surface-card);stroke-width:2}
+
+/* ── Tooltip ──────────────────────────────────────────────────────── */
+.chart-tooltip{
+  position:fixed;pointer-events:none;background:var(--surface-card);
+  border:1px solid var(--border);border-radius:8px;padding:10px 14px;
+  font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.12);z-index:100;
+  max-width:260px;opacity:0;transition:opacity .12s;color:var(--ink-primary);
+}
+.chart-tooltip.show{opacity:1}
+.tooltip-title{font-weight:600;margin-bottom:4px;font-size:12px;color:var(--ink-secondary)}
+.tooltip-row{display:flex;align-items:center;gap:6px}
+.tooltip-key{width:16px;height:2px;border-radius:1px;flex-shrink:0}
+.tooltip-value{font-weight:600;color:var(--ink-primary)}
+.tooltip-label{color:var(--ink-secondary)}
+
+/* ── Table view ───────────────────────────────────────────────────── */
+.data-table-wrap{display:none;overflow-x:auto}
+.data-table-wrap.show{display:block}
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{
+  text-align:left;font-weight:600;padding:8px 12px;border-bottom:2px solid var(--baseline);
+  color:var(--ink-secondary);font-size:12px;text-transform:uppercase;letter-spacing:.03em;
+}
+.data-table td{padding:8px 12px;border-bottom:1px solid var(--grid);font-variant-numeric:tabular-nums}
+.data-table tr:last-child td{border-bottom:none}
+
+/* ── Empty / error ────────────────────────────────────────────────── */
+.empty-state{display:flex;align-items:center;justify-content:center;height:180px;color:var(--ink-muted);font-size:14px}
+.error-banner{
+  background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;
+  padding:12px 16px;margin-bottom:16px;font-size:14px;color:#991b1b;display:none;
+}
+@media(prefers-color-scheme:dark){
+  :root:where(:not([data-theme="light"])) .error-banner{background:#2c1a1a;border-color:#7f1d1d;color:#fca5a5}
+}
+:root[data-theme="dark"] .error-banner{background:#2c1a1a;border-color:#7f1d1d;color:#fca5a5}
+.error-banner.show{display:block}
+</style>
+</head>
+<body>
+
+<!-- Auth gate -->
+<div id="auth-banner">
+  <h1>GetChartered Admin</h1>
+  <p>Sign in with your team account to view analytics.</p>
+  <p class="auth-loading" id="auth-loading" style="display:none">Checking authentication…</p>
+  <button id="loginBtn" onclick="doLogin()">Sign in</button>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard" style="display:none">
+  <div class="dash-header">
+    <h1>GetChartered Analytics</h1>
+    <span class="subtitle" id="range-label"></span>
+    <div class="user-info">
+      <span id="user-email"></span>
+      <button class="logout-btn" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <button class="filter-btn" data-days="7">Last 7 days</button>
+    <button class="filter-btn active" data-days="30">Last 30 days</button>
+    <button class="filter-btn" data-days="90">Last 90 days</button>
+    <div class="custom-dates">
+      <input type="date" id="startDate"> – <input type="date" id="endDate">
+      <button class="filter-btn" onclick="applyCustomRange()">Apply</button>
+    </div>
+    <button class="refresh-btn" id="refreshBtn" onclick="refreshAll()">Refresh</button>
+  </div>
+
+  <div class="error-banner" id="errorBanner"></div>
+
+  <div class="kpi-row" id="kpiRow">
+    <div class="stat-tile"><div class="label">Total attempts</div><div class="value" id="kpi-attempts">–</div></div>
+    <div class="stat-tile"><div class="label">Unique users</div><div class="value" id="kpi-users">–</div></div>
+    <div class="stat-tile"><div class="label">Accuracy</div><div class="value" id="kpi-accuracy">–</div></div>
+    <div class="stat-tile"><div class="label">Avg time</div><div class="value" id="kpi-time">–</div></div>
+    <div class="stat-tile"><div class="label">Sessions</div><div class="value" id="kpi-sessions">–</div></div>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card" id="card-daily">
+      <div class="card-header">
+        <span class="card-title">Daily attempts</span>
+        <button class="table-toggle" onclick="toggleTable('daily')">Table view</button>
+      </div>
+      <div id="chart-daily"></div>
+      <div class="data-table-wrap" id="table-daily"></div>
+    </div>
+    <div class="chart-card" id="card-accuracy">
+      <div class="card-header">
+        <span class="card-title">Accuracy distribution</span>
+        <button class="table-toggle" onclick="toggleTable('accuracy')">Table view</button>
+      </div>
+      <div id="chart-accuracy"></div>
+      <div class="data-table-wrap" id="table-accuracy"></div>
+    </div>
+    <div class="chart-card" id="card-course">
+      <div class="card-header">
+        <span class="card-title">Attempts by course</span>
+        <button class="table-toggle" onclick="toggleTable('course')">Table view</button>
+      </div>
+      <div id="chart-course"></div>
+      <div class="data-table-wrap" id="table-course"></div>
+    </div>
+    <div class="chart-card" id="card-module">
+      <div class="card-header">
+        <span class="card-title">Top modules</span>
+        <button class="table-toggle" onclick="toggleTable('module')">Table view</button>
+      </div>
+      <div id="chart-module"></div>
+      <div class="data-table-wrap" id="table-module"></div>
+    </div>
+  </div>
+</div>
+
+<div class="chart-tooltip" id="tooltip"></div>
+
+<!-- Auth0 SPA SDK -->
+<script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// CONFIG — update these if your Auth0 app changes
+// ════════════════════════════════════════════════════════════════════
+const AUTH0_DOMAIN   = "auth.getchartered.app";
+const AUTH0_CLIENT   = "smexTq6jFRs5sqEtBvMuoLwXaF8UjMD8";
+const AUTH0_AUDIENCE = "https://getchartered.app/api/authVerify";
+const API_BASE       = "https://mqtt2y9shf.execute-api.eu-west-2.amazonaws.com";
+
+let auth0Client = null;
+let accessToken = null;
+let currentStart = "";
+let currentEnd   = "";
+
+// ════════════════════════════════════════════════════════════════════
+// AUTH0 INITIALISATION
+// ════════════════════════════════════════════════════════════════════
+async function initAuth() {
+  const loadingEl = document.getElementById("auth-loading");
+  const loginBtn  = document.getElementById("loginBtn");
+
+  loadingEl.style.display = "";
+  loginBtn.style.display  = "none";
+
+  try {
+    auth0Client = await auth0.createAuth0Client({
+      domain:       AUTH0_DOMAIN,
+      clientId:     AUTH0_CLIENT,
+      authorizationParams: {
+        audience:     AUTH0_AUDIENCE,
+        redirect_uri: window.location.origin + window.location.pathname,
+      },
+      cacheLocation: "localstorage",
+      useRefreshTokens: true,
+    });
+
+    // Handle redirect callback
+    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+      await auth0Client.handleRedirectCallback();
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Check if already authenticated
+    if (await auth0Client.isAuthenticated()) {
+      accessToken = await auth0Client.getTokenSilently();
+      const user  = await auth0Client.getUser();
+      showDashboard(user);
+    } else {
+      loadingEl.style.display = "none";
+      loginBtn.style.display  = "";
+    }
+  } catch (err) {
+    console.error("Auth init error:", err);
+    loadingEl.textContent = "Auth error — check console. You can still paste a token below.";
+    loadingEl.style.display = "";
+    loginBtn.style.display  = "";
+    loginBtn.textContent    = "Paste token manually";
+    loginBtn.onclick = () => {
+      const t = prompt("Paste your Auth0 access token (JWT):");
+      if (t && t.trim()) { accessToken = t.trim(); showDashboard(null); }
+    };
+  }
+}
+
+async function doLogin() {
+  if (!auth0Client) {
+    // Fallback if SDK failed to load
+    const t = prompt("Paste your Auth0 access token (JWT):");
+    if (t && t.trim()) { accessToken = t.trim(); showDashboard(null); }
+    return;
+  }
+  await auth0Client.loginWithRedirect();
+}
+
+async function doLogout() {
+  if (auth0Client && await auth0Client.isAuthenticated()) {
+    await auth0Client.logout({
+      logoutParams: { returnTo: window.location.origin + window.location.pathname }
+    });
+  } else {
+    accessToken = null;
+    document.getElementById("dashboard").style.display = "none";
+    document.getElementById("auth-banner").style.display = "";
+  }
+}
+
+function showDashboard(user) {
+  document.getElementById("auth-banner").style.display = "none";
+  document.getElementById("dashboard").style.display   = "";
+  if (user && user.email) {
+    document.getElementById("user-email").textContent = user.email;
+  }
+  setRange(30);
+}
+
+// Kick off
+initAuth();
+
+// ════════════════════════════════════════════════════════════════════
+// DATE RANGE
+// ════════════════════════════════════════════════════════════════════
+function isoDate(d) { return d.toISOString().slice(0, 10); }
+
+function setRange(days) {
+  const end   = new Date();
+  const start = new Date(Date.now() - days * 86400000);
+  currentStart = isoDate(start);
+  currentEnd   = isoDate(end);
+  document.getElementById("startDate").value = currentStart;
+  document.getElementById("endDate").value   = currentEnd;
+  document.querySelectorAll(".filter-btn[data-days]").forEach(b => {
+    b.classList.toggle("active", Number(b.dataset.days) === days);
+  });
+  updateRangeLabel();
+  refreshAll();
+}
+
+function applyCustomRange() {
+  const s = document.getElementById("startDate").value;
+  const e = document.getElementById("endDate").value;
+  if (!s || !e) return;
+  currentStart = s; currentEnd = e;
+  document.querySelectorAll(".filter-btn[data-days]").forEach(b => b.classList.remove("active"));
+  updateRangeLabel();
+  refreshAll();
+}
+
+function updateRangeLabel() {
+  const fmt = d => new Date(d + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  document.getElementById("range-label").textContent = `${fmt(currentStart)} – ${fmt(currentEnd)}`;
+}
+
+document.querySelectorAll(".filter-btn[data-days]").forEach(b => {
+  b.addEventListener("click", () => setRange(Number(b.dataset.days)));
+});
+
+// ════════════════════════════════════════════════════════════════════
+// FETCH
+// ════════════════════════════════════════════════════════════════════
+async function fetchMetric(metric) {
+  // Refresh token if using SDK
+  if (auth0Client) {
+    try { accessToken = await auth0Client.getTokenSilently(); } catch (_) {}
+  }
+  const url = `${API_BASE}/admin/dashboard?metric=${metric}&startDate=${currentStart}&endDate=${currentEnd}`;
+  const headers = {};
+  if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
+  const r = await fetch(url, { headers });
+  if (!r.ok) {
+    const body = await r.text();
+    throw new Error(`${r.status}: ${body}`);
+  }
+  return (await r.json()).data;
+}
+
+async function refreshAll() {
+  const btn = document.getElementById("refreshBtn");
+  btn.disabled = true;
+  const errEl = document.getElementById("errorBanner");
+  errEl.classList.remove("show");
+
+  try {
+    const [summary, daily, accuracyDist, byCourse, byModule] = await Promise.allSettled([
+      fetchMetric("attempts_summary"),
+      fetchMetric("attempts_by_day"),
+      fetchMetric("accuracy_distribution"),
+      fetchMetric("attempts_by_course"),
+      fetchMetric("attempts_by_module"),
+    ]);
+
+    if (summary.status === "fulfilled" && summary.value.length) {
+      const s = summary.value[0];
+      setKPI("attempts", compactNum(s.total_attempts));
+      setKPI("users",    compactNum(s.unique_users));
+      setKPI("accuracy", s.accuracy_pct != null ? s.accuracy_pct + "%" : "–");
+      setKPI("time",     s.avg_time_secs != null ? s.avg_time_secs + "s" : "–");
+      setKPI("sessions", compactNum(s.unique_sessions));
+    }
+    if (daily.status === "fulfilled") renderDailyChart(daily.value);
+    else showCardError("daily", daily.reason);
+    if (accuracyDist.status === "fulfilled") renderAccuracyChart(accuracyDist.value);
+    else showCardError("accuracy", accuracyDist.reason);
+    if (byCourse.status === "fulfilled") renderHBarChart("course", byCourse.value, "course", "attempts", "accuracy_pct");
+    else showCardError("course", byCourse.reason);
+    if (byModule.status === "fulfilled") renderHBarChart("module", byModule.value, "module", "attempts", "accuracy_pct");
+    else showCardError("module", byModule.reason);
+  } catch (e) {
+    errEl.textContent = "Error loading dashboard: " + e.message;
+    errEl.classList.add("show");
+  }
+  btn.disabled = false;
+}
+
+function showCardError(card, err) {
+  const el = document.getElementById("chart-" + card);
+  if (el) el.innerHTML = `<div class="empty-state">Error: ${escHtml(String(err?.message || err))}</div>`;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// FORMATTING
+// ════════════════════════════════════════════════════════════════════
+function compactNum(n) {
+  if (n == null) return "–";
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  if (n >= 10_000)    return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+  return n.toLocaleString();
+}
+function setKPI(id, val) { document.getElementById("kpi-" + id).textContent = val; }
+function escHtml(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+// ════════════════════════════════════════════════════════════════════
+// TABLE VIEW
+// ════════════════════════════════════════════════════════════════════
+function toggleTable(card) {
+  const tw = document.getElementById("table-" + card);
+  const cv = document.getElementById("chart-" + card);
+  if (!tw) return;
+  const showing = tw.classList.toggle("show");
+  if (cv) cv.style.display = showing ? "none" : "";
+  const btn = tw.parentElement.querySelector(".table-toggle");
+  if (btn) btn.textContent = showing ? "Chart view" : "Table view";
+}
+function buildTable(columns, rows) {
+  const ths = columns.map(c => `<th>${escHtml(c.label)}</th>`).join("");
+  const trs = rows.map(r => {
+    const tds = columns.map(c => {
+      const v = r[c.key]; return `<td>${v != null ? escHtml(String(v)) : "–"}</td>`;
+    }).join("");
+    return `<tr>${tds}</tr>`;
+  }).join("");
+  return `<table class="data-table"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// TOOLTIP
+// ════════════════════════════════════════════════════════════════════
+const tooltipEl = document.getElementById("tooltip");
+function showTooltip(evt, html) {
+  tooltipEl.innerHTML = html;
+  tooltipEl.classList.add("show");
+  const r = tooltipEl.getBoundingClientRect();
+  let x = evt.clientX + 14, y = evt.clientY - 10;
+  if (x + r.width > window.innerWidth - 8)  x = evt.clientX - r.width - 14;
+  if (y + r.height > window.innerHeight - 8) y = window.innerHeight - r.height - 8;
+  if (y < 8) y = 8;
+  tooltipEl.style.left = x + "px";
+  tooltipEl.style.top  = y + "px";
+}
+function hideTooltip() { tooltipEl.classList.remove("show"); }
+
+// ════════════════════════════════════════════════════════════════════
+// CHART RENDERERS
+// ════════════════════════════════════════════════════════════════════
+const SVG_NS = "http://www.w3.org/2000/svg";
+function makeSVG(w, h) {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  svg.setAttribute("class", "chart-svg");
+  svg.setAttribute("role", "img");
+  return svg;
+}
+function svgEl(tag, attrs) {
+  const el = document.createElementNS(SVG_NS, tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+function svgText(x, y, txt, attrs = {}) {
+  const el = svgEl("text", { x, y, ...attrs });
+  el.textContent = txt;
+  return el;
+}
+
+// ── Daily attempts line chart ────────────────────────────────────
+function renderDailyChart(data) {
+  const container = document.getElementById("chart-daily");
+  const tableWrap = document.getElementById("table-daily");
+  if (!data || !data.length) {
+    container.innerHTML = '<div class="empty-state">No attempt data for this range</div>';
+    tableWrap.innerHTML = ""; return;
+  }
+  data.sort((a, b) => `${a.year}-${a.month}-${a.day}`.localeCompare(`${b.year}-${b.month}-${b.day}`));
+  const labels = data.map(d => `${d.day}/${d.month}`);
+  const values = data.map(d => d.attempts);
+  const maxVal = Math.max(...values, 1);
+
+  const W = 520, H = 220, ml = 48, mr = 16, mt = 12, mb = 32;
+  const pw = W - ml - mr, ph = H - mt - mb;
+  const svg = makeSVG(W, H);
+  svg.setAttribute("aria-label", "Daily attempts line chart");
+
+  const yTicks = niceScale(0, maxVal, 5);
+  for (const tick of yTicks) {
+    const y = mt + ph - (tick / maxVal) * ph;
+    svg.appendChild(svgEl("line", { x1: ml, x2: W - mr, y1: y, y2: y, class: "grid-line" }));
+    svg.appendChild(svgText(ml - 6, y + 4, compactNum(tick), { "text-anchor": "end", class: "axis-label" }));
+  }
+  svg.appendChild(svgEl("line", { x1: ml, x2: W - mr, y1: mt + ph, y2: mt + ph, class: "axis-line" }));
+
+  const pts = values.map((v, i) => ({
+    x: ml + (i / Math.max(values.length - 1, 1)) * pw,
+    y: mt + ph - (v / maxVal) * ph, v, label: labels[i]
+  }));
+
+  // Area fill
+  if (pts.length > 1) {
+    let areaD = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) areaD += ` L ${pts[i].x} ${pts[i].y}`;
+    areaD += ` L ${pts[pts.length-1].x} ${mt+ph} L ${pts[0].x} ${mt+ph} Z`;
+    svg.appendChild(svgEl("path", { d: areaD, fill: "var(--cat-1)", opacity: "0.1" }));
+  }
+  // Line
+  if (pts.length > 1) {
+    let pathD = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) pathD += ` L ${pts[i].x} ${pts[i].y}`;
+    svg.appendChild(svgEl("path", { d: pathD, class: "data-line", stroke: "var(--cat-1)" }));
+  }
+  // Dots
+  for (const p of pts) {
+    svg.appendChild(svgEl("circle", { cx: p.x, cy: p.y, r: 4, fill: "var(--cat-1)", class: "data-dot" }));
+  }
+  // End label
+  if (pts.length) {
+    const last = pts[pts.length - 1];
+    svg.appendChild(svgText(last.x + 6, last.y + 4, compactNum(last.v), {
+      class: "axis-label", fill: "var(--ink-secondary)", "font-weight": "600"
+    }));
+  }
+  // X labels
+  const skip = Math.ceil(labels.length / 12);
+  for (let i = 0; i < pts.length; i += skip) {
+    svg.appendChild(svgText(pts[i].x, mt + ph + 18, labels[i], { "text-anchor": "middle", class: "axis-label" }));
+  }
+  // Hover
+  const hitW = Math.max(pw / pts.length, 24);
+  for (const p of pts) {
+    const hit = svgEl("rect", { x: p.x - hitW/2, y: mt, width: hitW, height: ph, fill: "transparent" });
+    hit.addEventListener("pointermove", e => showTooltip(e,
+      `<div class="tooltip-title">${escHtml(p.label)}</div>` +
+      `<div class="tooltip-row"><span class="tooltip-key" style="background:var(--cat-1)"></span>` +
+      `<span class="tooltip-value">${compactNum(p.v)}</span> <span class="tooltip-label">attempts</span></div>`
+    ));
+    hit.addEventListener("pointerleave", hideTooltip);
+    svg.appendChild(hit);
+  }
+  container.innerHTML = "";
+  container.appendChild(svg);
+  tableWrap.innerHTML = buildTable(
+    [{ key: "date", label: "Date" }, { key: "attempts", label: "Attempts" }],
+    data.map(d => ({ date: `${d.day}/${d.month}/${d.year}`, attempts: d.attempts }))
+  );
+}
+
+// ── Accuracy distribution bar chart ─────────────────────────────
+function renderAccuracyChart(data) {
+  const container = document.getElementById("chart-accuracy");
+  const tableWrap = document.getElementById("table-accuracy");
+  if (!data || !data.length) {
+    container.innerHTML = '<div class="empty-state">No accuracy data for this range</div>';
+    tableWrap.innerHTML = ""; return;
+  }
+  const bandOrder = ["0-19%","20-39%","40-59%","60-79%","80-100%"];
+  const sorted = bandOrder.map(b => data.find(d => d.band === b) || { band: b, sessions: 0 });
+  const labels = sorted.map(d => d.band);
+  const values = sorted.map(d => d.sessions);
+  const maxVal = Math.max(...values, 1);
+
+  const W = 520, H = 220, ml = 48, mr = 16, mt = 12, mb = 32;
+  const pw = W - ml - mr, ph = H - mt - mb;
+  const barW = Math.min(24, (pw / labels.length) * 0.6);
+  const gap = pw / labels.length;
+  const svg = makeSVG(W, H);
+  svg.setAttribute("aria-label", "Accuracy distribution bar chart");
+
+  const yTicks = niceScale(0, maxVal, 5);
+  for (const tick of yTicks) {
+    const y = mt + ph - (tick / maxVal) * ph;
+    svg.appendChild(svgEl("line", { x1: ml, x2: W - mr, y1: y, y2: y, class: "grid-line" }));
+    svg.appendChild(svgText(ml - 6, y + 4, String(tick), { "text-anchor": "end", class: "axis-label" }));
+  }
+  svg.appendChild(svgEl("line", { x1: ml, x2: W - mr, y1: mt + ph, y2: mt + ph, class: "axis-line" }));
+
+  for (let i = 0; i < labels.length; i++) {
+    const cx = ml + gap * i + gap / 2;
+    const barH = (values[i] / maxVal) * ph;
+    svg.appendChild(svgEl("rect", {
+      x: cx - barW/2, y: mt + ph - barH, width: barW, height: Math.max(barH, 1),
+      fill: "var(--cat-1)", rx: 4, ry: 4,
+    }));
+    if (values[i] > 0) {
+      svg.appendChild(svgText(cx, mt + ph - barH - 6, compactNum(values[i]), {
+        "text-anchor": "middle", class: "axis-label", fill: "var(--ink-secondary)", "font-weight": "600", "font-size": "11"
+      }));
+    }
+    svg.appendChild(svgText(cx, mt + ph + 18, labels[i], { "text-anchor": "middle", class: "axis-label" }));
+    const hit = svgEl("rect", { x: cx - Math.max(barW,24)/2, y: mt, width: Math.max(barW,24), height: ph, fill: "transparent" });
+    hit.addEventListener("pointermove", e => showTooltip(e,
+      `<div class="tooltip-title">${escHtml(labels[i])}</div>` +
+      `<div class="tooltip-row"><span class="tooltip-key" style="background:var(--cat-1)"></span>` +
+      `<span class="tooltip-value">${compactNum(values[i])}</span> <span class="tooltip-label">sessions</span></div>`
+    ));
+    hit.addEventListener("pointerleave", hideTooltip);
+    svg.appendChild(hit);
+  }
+  container.innerHTML = "";
+  container.appendChild(svg);
+  tableWrap.innerHTML = buildTable(
+    [{ key: "band", label: "Accuracy band" }, { key: "sessions", label: "Sessions" }], sorted
+  );
+}
+
+// ── Horizontal bar chart (course / module) ──────────────────────
+function renderHBarChart(card, data, nameKey, valKey, accKey) {
+  const container = document.getElementById("chart-" + card);
+  const tableWrap = document.getElementById("table-" + card);
+  if (!data || !data.length) {
+    container.innerHTML = '<div class="empty-state">No data for this range</div>';
+    tableWrap.innerHTML = ""; return;
+  }
+  const items = data.slice(0, 12);
+  const maxVal = Math.max(...items.map(d => d[valKey]), 1);
+  const rowH = 32, labelW = 160;
+  const W = 520, ml = labelW + 8, mr = 60, mt = 4;
+  const barMaxW = W - ml - mr;
+  const H = mt + items.length * rowH + 4;
+  const barH = Math.min(20, rowH - 8);
+  const svg = makeSVG(W, H);
+  svg.setAttribute("aria-label", `${card} horizontal bar chart`);
+
+  for (let i = 0; i < items.length; i++) {
+    const y = mt + i * rowH + rowH / 2;
+    const val = items[i][valKey];
+    const name = items[i][nameKey] || "–";
+    const acc = items[i][accKey];
+    const bw = (val / maxVal) * barMaxW;
+    const labelText = name.length > 22 ? name.slice(0, 20) + "…" : name;
+
+    svg.appendChild(svgText(labelW, y + 4, labelText, {
+      "text-anchor": "end", class: "axis-label", fill: "var(--ink-secondary)", "font-size": "12"
+    }));
+    svg.appendChild(svgEl("rect", {
+      x: ml, y: y - barH/2, width: Math.max(bw, 2), height: barH,
+      fill: "var(--cat-1)", rx: 4, ry: 4,
+    }));
+    svg.appendChild(svgText(ml + Math.max(bw, 2) + 6, y + 4, compactNum(val), {
+      class: "axis-label", fill: "var(--ink-secondary)", "font-weight": "600", "font-size": "12"
+    }));
+
+    const hit = svgEl("rect", { x: 0, y: y - rowH/2, width: W, height: rowH, fill: "transparent" });
+    const fullName = name, accVal = acc;
+    hit.addEventListener("pointermove", e => {
+      let html = `<div class="tooltip-title">${escHtml(fullName)}</div>` +
+        `<div class="tooltip-row"><span class="tooltip-key" style="background:var(--cat-1)"></span>` +
+        `<span class="tooltip-value">${compactNum(val)}</span> <span class="tooltip-label">attempts</span></div>`;
+      if (accVal != null) html += `<div class="tooltip-row"><span class="tooltip-key" style="background:var(--cat-3)"></span>` +
+        `<span class="tooltip-value">${accVal}%</span> <span class="tooltip-label">accuracy</span></div>`;
+      showTooltip(e, html);
+    });
+    hit.addEventListener("pointerleave", hideTooltip);
+    svg.appendChild(hit);
+  }
+  container.innerHTML = "";
+  container.appendChild(svg);
+  tableWrap.innerHTML = buildTable([
+    { key: nameKey, label: card === "course" ? "Course" : "Module" },
+    { key: valKey, label: "Attempts" },
+    { key: "correct", label: "Correct" },
+    { key: accKey, label: "Accuracy %" }
+  ], items);
+}
+
+// ════════════════════════════════════════════════════════════════════
+// NICE SCALE
+// ════════════════════════════════════════════════════════════════════
+function niceScale(lo, hi, maxTicks) {
+  if (hi <= lo) hi = lo + 1;
+  const range = hi - lo;
+  const rough = range / maxTicks;
+  const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+  const frac = rough / mag;
+  let nice;
+  if (frac <= 1.5) nice = mag; else if (frac <= 3) nice = 2*mag;
+  else if (frac <= 7) nice = 5*mag; else nice = 10*mag;
+  const ticks = [];
+  for (let t = 0; t <= hi; t += nice) ticks.push(Math.round(t*1000)/1000);
+  if (ticks[ticks.length-1] < hi) ticks.push(ticks[ticks.length-1] + nice);
+  return ticks;
+}
+</script>
+</body>
+</html>
