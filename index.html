@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GetChartered · Admin Dashboard</title>
+<title>GetChartered · Product Dashboard</title>
 <style>
 /* ── Colour roles ─────────────────────────────────────────────────── */
 :root {
@@ -20,6 +20,7 @@
   --cat-2: #eb6834;
   --cat-3: #1baf7a;
   --cat-4: #eda100;
+  --cat-5: #e87ba4;
   --seq-100: #cde2fb; --seq-250: #86b6ef;
   --seq-400: #3987e5; --seq-600: #184f95;
   --good:     #006300;
@@ -38,6 +39,7 @@
     --ink-primary:#ffffff; --ink-secondary:#c3c2b7; --ink-muted:#898781;
     --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,0.10);
     --cat-1:#3987e5; --cat-2:#d95926; --cat-3:#199e70; --cat-4:#c98500;
+    --cat-5:#d55181;
     --seq-100:#0d366b; --seq-250:#184f95; --seq-400:#3987e5; --seq-600:#86b6ef;
     --good:#0ca30c; --bad:#e66767;
     --delta-up:#0ca30c; --delta-down:#e66767;
@@ -50,6 +52,7 @@
   --ink-primary:#ffffff; --ink-secondary:#c3c2b7; --ink-muted:#898781;
   --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,0.10);
   --cat-1:#3987e5; --cat-2:#d95926; --cat-3:#199e70; --cat-4:#c98500;
+  --cat-5:#d55181;
   --seq-100:#0d366b; --seq-250:#184f95; --seq-400:#3987e5; --seq-600:#86b6ef;
   --good:#0ca30c; --bad:#e66767;
   --delta-up:#0ca30c; --delta-down:#e66767;
@@ -104,11 +107,36 @@ body{
 }
 .refresh-btn:disabled{opacity:.5;cursor:not-allowed}
 
-/* ── Loading ──────────────────────────────────────────────────────── */
-.loading-overlay{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  background:var(--surface-card);opacity:.7;border-radius:12px;z-index:2;
+/* ── Section headers ─────────────────────────────────────────────── */
+.section-header{
+  font-size:16px;font-weight:600;margin:32px 0 16px;padding-bottom:8px;
+  border-bottom:1px solid var(--border);color:var(--ink-primary);
+  display:flex;align-items:center;gap:8px;
 }
+.section-header:first-of-type{margin-top:8px}
+.section-tag{
+  font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;
+  text-transform:uppercase;letter-spacing:.04em;
+}
+.tag-growth{background:#dbeafe;color:#1e40af}
+.tag-engage{background:#fef3c7;color:#92400e}
+.tag-content{background:#d1fae5;color:#065f46}
+.tag-retain{background:#ede9fe;color:#5b21b6}
+.tag-revenue{background:#fce7f3;color:#9d174d}
+@media(prefers-color-scheme:dark){
+  :root:where(:not([data-theme="light"])) .tag-growth{background:#1e3a5f;color:#93c5fd}
+  :root:where(:not([data-theme="light"])) .tag-engage{background:#451a03;color:#fcd34d}
+  :root:where(:not([data-theme="light"])) .tag-content{background:#064e3b;color:#6ee7b7}
+  :root:where(:not([data-theme="light"])) .tag-retain{background:#3b0764;color:#c4b5fd}
+  :root:where(:not([data-theme="light"])) .tag-revenue{background:#831843;color:#f9a8d4}
+}
+:root[data-theme="dark"] .tag-growth{background:#1e3a5f;color:#93c5fd}
+:root[data-theme="dark"] .tag-engage{background:#451a03;color:#fcd34d}
+:root[data-theme="dark"] .tag-content{background:#064e3b;color:#6ee7b7}
+:root[data-theme="dark"] .tag-retain{background:#3b0764;color:#c4b5fd}
+:root[data-theme="dark"] .tag-revenue{background:#831843;color:#f9a8d4}
+
+/* ── Loading ──────────────────────────────────────────────────────── */
 .spinner{
   width:24px;height:24px;border:3px solid var(--grid);
   border-top-color:var(--cat-1);border-radius:50%;animation:spin .8s linear infinite;
@@ -117,30 +145,29 @@ body{
 
 /* ── KPI tiles ────────────────────────────────────────────────────── */
 .kpi-row{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:16px;margin-bottom:24px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:12px;margin-bottom:20px;
 }
 .stat-tile{
   background:var(--surface-card);border:1px solid var(--border);
-  border-radius:12px;padding:20px 20px 16px;position:relative;
+  border-radius:12px;padding:16px 16px 12px;position:relative;
 }
 .stat-tile .label{
-  font-size:13px;color:var(--ink-muted);font-weight:500;
-  text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;
+  font-size:11px;color:var(--ink-muted);font-weight:500;
+  text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;
 }
-.stat-tile .value{font-size:32px;font-weight:600;line-height:1.15}
-.stat-tile .delta{font-size:13px;font-weight:500;margin-top:4px}
-.delta.up{color:var(--delta-up)} .delta.down{color:var(--delta-down)}
+.stat-tile .value{font-size:28px;font-weight:600;line-height:1.15}
+.stat-tile .sub{font-size:12px;color:var(--ink-muted);margin-top:2px}
 
 /* ── Chart cards ──────────────────────────────────────────────────── */
 .chart-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));
-  gap:16px;margin-bottom:24px;
+  gap:16px;margin-bottom:8px;
 }
 @media(max-width:520px){.chart-grid{grid-template-columns:1fr}}
 .chart-card{
   background:var(--surface-card);border:1px solid var(--border);
-  border-radius:12px;padding:20px;position:relative;min-height:280px;
+  border-radius:12px;padding:20px;position:relative;min-height:260px;
 }
 .chart-card .card-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px}
 .chart-card .card-title{font-size:15px;font-weight:600}
@@ -184,7 +211,7 @@ body{
 .data-table tr:last-child td{border-bottom:none}
 
 /* ── Empty / error ────────────────────────────────────────────────── */
-.empty-state{display:flex;align-items:center;justify-content:center;height:180px;color:var(--ink-muted);font-size:14px}
+.empty-state{display:flex;align-items:center;justify-content:center;height:160px;color:var(--ink-muted);font-size:14px}
 .error-banner{
   background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;
   padding:12px 16px;margin-bottom:16px;font-size:14px;color:#991b1b;display:none;
@@ -194,13 +221,20 @@ body{
 }
 :root[data-theme="dark"] .error-banner{background:#2c1a1a;border-color:#7f1d1d;color:#fca5a5}
 .error-banner.show{display:block}
+
+/* ── Info note ────────────────────────────────────────────────────── */
+.info-note{
+  font-size:13px;color:var(--ink-muted);padding:12px 16px;
+  background:var(--surface-card);border:1px solid var(--border);
+  border-radius:8px;margin-bottom:16px;
+}
 </style>
 </head>
 <body>
 
 <!-- Auth gate -->
 <div id="auth-banner">
-  <h1>GetChartered Admin</h1>
+  <h1>GetChartered Product Dashboard</h1>
   <p>Sign in with your team account to view analytics.</p>
   <p class="auth-loading" id="auth-loading" style="display:none">Checking authentication…</p>
   <button id="loginBtn" onclick="doLogin()">Sign in</button>
@@ -209,7 +243,7 @@ body{
 <!-- Dashboard -->
 <div id="dashboard" style="display:none">
   <div class="dash-header">
-    <h1>GetChartered Analytics</h1>
+    <h1>GetChartered Product Dashboard</h1>
     <span class="subtitle" id="range-label"></span>
     <div class="user-info">
       <span id="user-email"></span>
@@ -230,22 +264,69 @@ body{
 
   <div class="error-banner" id="errorBanner"></div>
 
-  <div class="kpi-row" id="kpiRow">
-    <div class="stat-tile"><div class="label">Total attempts</div><div class="value" id="kpi-attempts">–</div></div>
-    <div class="stat-tile"><div class="label">Unique users</div><div class="value" id="kpi-users">–</div></div>
-    <div class="stat-tile"><div class="label">Accuracy</div><div class="value" id="kpi-accuracy">–</div></div>
-    <div class="stat-tile"><div class="label">Avg time</div><div class="value" id="kpi-time">–</div></div>
-    <div class="stat-tile"><div class="label">Sessions</div><div class="value" id="kpi-sessions">–</div></div>
+  <!-- ═══════════ GROWTH ═══════════ -->
+  <div class="section-header"><span class="section-tag tag-growth">Growth</span> Is the business growing?</div>
+  <div class="kpi-row" id="kpi-growth">
+    <div class="stat-tile"><div class="label">Active users</div><div class="value" id="kpi-users">–</div></div>
+    <div class="stat-tile"><div class="label">Study sessions</div><div class="value" id="kpi-sessions">–</div></div>
+    <div class="stat-tile"><div class="label">Questions answered</div><div class="value" id="kpi-attempts">–</div></div>
   </div>
-
   <div class="chart-grid">
+    <div class="chart-card" id="card-users-day">
+      <div class="card-header">
+        <span class="card-title">Active users per day</span>
+        <button class="table-toggle" onclick="toggleTable('users-day')">Table view</button>
+      </div>
+      <div id="chart-users-day"></div>
+      <div class="data-table-wrap" id="table-users-day"></div>
+    </div>
     <div class="chart-card" id="card-daily">
       <div class="card-header">
-        <span class="card-title">Daily attempts</span>
+        <span class="card-title">Questions answered per day</span>
         <button class="table-toggle" onclick="toggleTable('daily')">Table view</button>
       </div>
       <div id="chart-daily"></div>
       <div class="data-table-wrap" id="table-daily"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ ENGAGEMENT ═══════════ -->
+  <div class="section-header"><span class="section-tag tag-engage">Engagement</span> Are they actually studying?</div>
+  <div class="kpi-row" id="kpi-engage">
+    <div class="stat-tile"><div class="label">Sessions / user</div><div class="value" id="kpi-spu">–</div><div class="sub">stickiness</div></div>
+    <div class="stat-tile"><div class="label">Questions / session</div><div class="value" id="kpi-qps">–</div></div>
+    <div class="stat-tile"><div class="label">Avg time / question</div><div class="value" id="kpi-tpq">–</div></div>
+    <div class="stat-tile"><div class="label">Overall accuracy</div><div class="value" id="kpi-accuracy">–</div></div>
+  </div>
+  <div class="chart-grid">
+    <div class="chart-card" id="card-sessions-day">
+      <div class="card-header">
+        <span class="card-title">Study sessions per day</span>
+        <button class="table-toggle" onclick="toggleTable('sessions-day')">Table view</button>
+      </div>
+      <div id="chart-sessions-day"></div>
+      <div class="data-table-wrap" id="table-sessions-day"></div>
+    </div>
+    <div class="chart-card" id="card-screens">
+      <div class="card-header">
+        <span class="card-title">Most visited screens</span>
+        <button class="table-toggle" onclick="toggleTable('screens')">Table view</button>
+      </div>
+      <div id="chart-screens"></div>
+      <div class="data-table-wrap" id="table-screens"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ CONTENT ═══════════ -->
+  <div class="section-header"><span class="section-tag tag-content">Content</span> Is the product working?</div>
+  <div class="chart-grid">
+    <div class="chart-card" id="card-difficulty">
+      <div class="card-header">
+        <span class="card-title">Module difficulty (hardest first)</span>
+        <button class="table-toggle" onclick="toggleTable('difficulty')">Table view</button>
+      </div>
+      <div id="chart-difficulty"></div>
+      <div class="data-table-wrap" id="table-difficulty"></div>
     </div>
     <div class="chart-card" id="card-accuracy">
       <div class="card-header">
@@ -255,6 +336,8 @@ body{
       <div id="chart-accuracy"></div>
       <div class="data-table-wrap" id="table-accuracy"></div>
     </div>
+  </div>
+  <div class="chart-grid">
     <div class="chart-card" id="card-course">
       <div class="card-header">
         <span class="card-title">Attempts by course</span>
@@ -265,13 +348,50 @@ body{
     </div>
     <div class="chart-card" id="card-module">
       <div class="card-header">
-        <span class="card-title">Top modules</span>
+        <span class="card-title">Most popular modules</span>
         <button class="table-toggle" onclick="toggleTable('module')">Table view</button>
       </div>
       <div id="chart-module"></div>
       <div class="data-table-wrap" id="table-module"></div>
     </div>
   </div>
+
+  <!-- ═══════════ RETENTION ═══════════ -->
+  <div class="section-header"><span class="section-tag tag-retain">Retention</span> Are we keeping them?</div>
+  <div class="kpi-row" id="kpi-retain">
+    <div class="stat-tile"><div class="label">Retention rate</div><div class="value" id="kpi-retention">–</div><div class="sub" id="kpi-retention-sub">users active in both halves of period</div></div>
+    <div class="stat-tile"><div class="label">First-half users</div><div class="value" id="kpi-fh-users">–</div></div>
+    <div class="stat-tile"><div class="label">Second-half users</div><div class="value" id="kpi-sh-users">–</div></div>
+    <div class="stat-tile"><div class="label">Retained users</div><div class="value" id="kpi-ret-users">–</div></div>
+  </div>
+  <div class="chart-grid">
+    <div class="chart-card" id="card-frequency">
+      <div class="card-header">
+        <span class="card-title">User session frequency</span>
+        <button class="table-toggle" onclick="toggleTable('frequency')">Table view</button>
+      </div>
+      <div id="chart-frequency"></div>
+      <div class="data-table-wrap" id="table-frequency"></div>
+    </div>
+    <div class="chart-card" id="card-features">
+      <div class="card-header">
+        <span class="card-title">Feature usage</span>
+        <button class="table-toggle" onclick="toggleTable('features')">Table view</button>
+      </div>
+      <div id="chart-features"></div>
+      <div class="data-table-wrap" id="table-features"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ REVENUE ═══════════ -->
+  <div class="section-header"><span class="section-tag tag-revenue">Revenue</span> Is it making money?</div>
+  <div class="kpi-row" id="kpi-revenue">
+    <div class="stat-tile"><div class="label">Checkouts started</div><div class="value" id="kpi-checkouts">–</div></div>
+    <div class="stat-tile"><div class="label">Purchases completed</div><div class="value" id="kpi-purchases">–</div></div>
+    <div class="stat-tile"><div class="label">Conversion rate</div><div class="value" id="kpi-conversion">–</div></div>
+  </div>
+  <div class="info-note">Revenue figures require Stripe data. Once connected, this section will show MRR, ARPU, and churn.</div>
+
 </div>
 
 <div class="chart-tooltip" id="tooltip"></div>
@@ -281,7 +401,7 @@ body{
 
 <script>
 // ════════════════════════════════════════════════════════════════════
-// CONFIG — update these if your Auth0 app changes
+// CONFIG
 // ════════════════════════════════════════════════════════════════════
 const AUTH0_DOMAIN   = "auth.getchartered.app";
 const AUTH0_CLIENT   = "smexTq6jFRs5sqEtBvMuoLwXaF8UjMD8";
@@ -294,181 +414,186 @@ let currentStart = "";
 let currentEnd   = "";
 
 // ════════════════════════════════════════════════════════════════════
-// AUTH0 INITIALISATION
+// AUTH0
 // ════════════════════════════════════════════════════════════════════
 async function initAuth() {
   const loadingEl = document.getElementById("auth-loading");
   const loginBtn  = document.getElementById("loginBtn");
-
   loadingEl.style.display = "";
   loginBtn.style.display  = "none";
 
   try {
     auth0Client = await auth0.createAuth0Client({
-      domain:       AUTH0_DOMAIN,
-      clientId:     AUTH0_CLIENT,
-      authorizationParams: {
-        audience:     AUTH0_AUDIENCE,
-        redirect_uri: window.location.origin + window.location.pathname,
-      },
-      cacheLocation: "localstorage",
-      useRefreshTokens: true,
+      domain: AUTH0_DOMAIN, clientId: AUTH0_CLIENT,
+      authorizationParams: { audience: AUTH0_AUDIENCE, redirect_uri: window.location.origin + window.location.pathname },
+      cacheLocation: "localstorage", useRefreshTokens: true,
     });
-
-    // Handle redirect callback
     if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
       await auth0Client.handleRedirectCallback();
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-
-    // Check if already authenticated
     if (await auth0Client.isAuthenticated()) {
       accessToken = await auth0Client.getTokenSilently();
-      const user  = await auth0Client.getUser();
-      showDashboard(user);
-    } else {
-      loadingEl.style.display = "none";
-      loginBtn.style.display  = "";
-    }
+      showDashboard(await auth0Client.getUser());
+    } else { loadingEl.style.display = "none"; loginBtn.style.display = ""; }
   } catch (err) {
     console.error("Auth init error:", err);
-    loadingEl.textContent = "Auth error — check console. You can still paste a token below.";
+    loadingEl.textContent = "Auth error — check console.";
     loadingEl.style.display = "";
-    loginBtn.style.display  = "";
-    loginBtn.textContent    = "Paste token manually";
-    loginBtn.onclick = () => {
-      const t = prompt("Paste your Auth0 access token (JWT):");
-      if (t && t.trim()) { accessToken = t.trim(); showDashboard(null); }
-    };
+    loginBtn.style.display = "";
+    loginBtn.textContent = "Paste token manually";
+    loginBtn.onclick = () => { const t = prompt("Paste JWT:"); if (t?.trim()) { accessToken = t.trim(); showDashboard(null); } };
   }
 }
-
 async function doLogin() {
-  if (!auth0Client) {
-    // Fallback if SDK failed to load
-    const t = prompt("Paste your Auth0 access token (JWT):");
-    if (t && t.trim()) { accessToken = t.trim(); showDashboard(null); }
-    return;
-  }
+  if (!auth0Client) { const t = prompt("Paste JWT:"); if (t?.trim()) { accessToken = t.trim(); showDashboard(null); } return; }
   await auth0Client.loginWithRedirect();
 }
-
 async function doLogout() {
   if (auth0Client && await auth0Client.isAuthenticated()) {
-    await auth0Client.logout({
-      logoutParams: { returnTo: window.location.origin + window.location.pathname }
-    });
-  } else {
-    accessToken = null;
-    document.getElementById("dashboard").style.display = "none";
-    document.getElementById("auth-banner").style.display = "";
-  }
+    await auth0Client.logout({ logoutParams: { returnTo: window.location.origin + window.location.pathname } });
+  } else { accessToken = null; document.getElementById("dashboard").style.display = "none"; document.getElementById("auth-banner").style.display = ""; }
 }
-
 function showDashboard(user) {
   document.getElementById("auth-banner").style.display = "none";
-  document.getElementById("dashboard").style.display   = "";
-  if (user && user.email) {
-    document.getElementById("user-email").textContent = user.email;
-  }
+  document.getElementById("dashboard").style.display = "";
+  if (user?.email) document.getElementById("user-email").textContent = user.email;
   setRange(30);
 }
-
-// Kick off
 initAuth();
 
 // ════════════════════════════════════════════════════════════════════
 // DATE RANGE
 // ════════════════════════════════════════════════════════════════════
 function isoDate(d) { return d.toISOString().slice(0, 10); }
-
 function setRange(days) {
-  const end   = new Date();
-  const start = new Date(Date.now() - days * 86400000);
-  currentStart = isoDate(start);
-  currentEnd   = isoDate(end);
+  const end = new Date(), start = new Date(Date.now() - days * 86400000);
+  currentStart = isoDate(start); currentEnd = isoDate(end);
   document.getElementById("startDate").value = currentStart;
-  document.getElementById("endDate").value   = currentEnd;
-  document.querySelectorAll(".filter-btn[data-days]").forEach(b => {
-    b.classList.toggle("active", Number(b.dataset.days) === days);
-  });
-  updateRangeLabel();
-  refreshAll();
+  document.getElementById("endDate").value = currentEnd;
+  document.querySelectorAll(".filter-btn[data-days]").forEach(b => b.classList.toggle("active", Number(b.dataset.days) === days));
+  updateRangeLabel(); refreshAll();
 }
-
 function applyCustomRange() {
-  const s = document.getElementById("startDate").value;
-  const e = document.getElementById("endDate").value;
+  const s = document.getElementById("startDate").value, e = document.getElementById("endDate").value;
   if (!s || !e) return;
   currentStart = s; currentEnd = e;
   document.querySelectorAll(".filter-btn[data-days]").forEach(b => b.classList.remove("active"));
-  updateRangeLabel();
-  refreshAll();
+  updateRangeLabel(); refreshAll();
 }
-
 function updateRangeLabel() {
   const fmt = d => new Date(d + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   document.getElementById("range-label").textContent = `${fmt(currentStart)} – ${fmt(currentEnd)}`;
 }
-
-document.querySelectorAll(".filter-btn[data-days]").forEach(b => {
-  b.addEventListener("click", () => setRange(Number(b.dataset.days)));
-});
+document.querySelectorAll(".filter-btn[data-days]").forEach(b => b.addEventListener("click", () => setRange(Number(b.dataset.days))));
 
 // ════════════════════════════════════════════════════════════════════
 // FETCH
 // ════════════════════════════════════════════════════════════════════
 async function fetchMetric(metric) {
-  // Refresh token if using SDK
-  if (auth0Client) {
-    try { accessToken = await auth0Client.getTokenSilently(); } catch (_) {}
-  }
+  if (auth0Client) { try { accessToken = await auth0Client.getTokenSilently(); } catch (_) {} }
   const url = `${API_BASE}/admin/dashboard?metric=${metric}&startDate=${currentStart}&endDate=${currentEnd}`;
   const headers = {};
   if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
   const r = await fetch(url, { headers });
-  if (!r.ok) {
-    const body = await r.text();
-    throw new Error(`${r.status}: ${body}`);
-  }
+  if (!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
   return (await r.json()).data;
 }
 
 async function refreshAll() {
   const btn = document.getElementById("refreshBtn");
   btn.disabled = true;
-  const errEl = document.getElementById("errorBanner");
-  errEl.classList.remove("show");
+  document.getElementById("errorBanner").classList.remove("show");
 
-  try {
-    const [summary, daily, accuracyDist, byCourse, byModule] = await Promise.allSettled([
-      fetchMetric("attempts_summary"),
-      fetchMetric("attempts_by_day"),
-      fetchMetric("accuracy_distribution"),
-      fetchMetric("attempts_by_course"),
-      fetchMetric("attempts_by_module"),
-    ]);
+  const results = await Promise.allSettled([
+    fetchMetric("attempts_summary"),       // 0
+    fetchMetric("users_by_day"),           // 1
+    fetchMetric("attempts_by_day"),        // 2
+    fetchMetric("engagement_summary"),     // 3
+    fetchMetric("study_sessions_by_day"),  // 4
+    fetchMetric("top_screens"),            // 5
+    fetchMetric("module_difficulty"),      // 6
+    fetchMetric("accuracy_distribution"), // 7
+    fetchMetric("attempts_by_course"),     // 8
+    fetchMetric("attempts_by_module"),     // 9
+    fetchMetric("returning_users"),        // 10
+    fetchMetric("user_frequency"),         // 11
+    fetchMetric("conversion_funnel"),      // 12
+    fetchMetric("top_features"),           // 13
+  ]);
 
-    if (summary.status === "fulfilled" && summary.value.length) {
-      const s = summary.value[0];
-      setKPI("attempts", compactNum(s.total_attempts));
-      setKPI("users",    compactNum(s.unique_users));
-      setKPI("accuracy", s.accuracy_pct != null ? s.accuracy_pct + "%" : "–");
-      setKPI("time",     s.avg_time_secs != null ? s.avg_time_secs + "s" : "–");
-      setKPI("sessions", compactNum(s.unique_sessions));
-    }
-    if (daily.status === "fulfilled") renderDailyChart(daily.value);
-    else showCardError("daily", daily.reason);
-    if (accuracyDist.status === "fulfilled") renderAccuracyChart(accuracyDist.value);
-    else showCardError("accuracy", accuracyDist.reason);
-    if (byCourse.status === "fulfilled") renderHBarChart("course", byCourse.value, "course", "attempts", "accuracy_pct");
-    else showCardError("course", byCourse.reason);
-    if (byModule.status === "fulfilled") renderHBarChart("module", byModule.value, "module", "attempts", "accuracy_pct");
-    else showCardError("module", byModule.reason);
-  } catch (e) {
-    errEl.textContent = "Error loading dashboard: " + e.message;
-    errEl.classList.add("show");
+  const get = i => results[i].status === "fulfilled" ? results[i].value : null;
+
+  // ── Growth KPIs ──
+  const summary = get(0);
+  if (summary?.length) {
+    const s = summary[0];
+    setKPI("users", compactNum(s.unique_users));
+    setKPI("sessions", compactNum(s.unique_sessions));
+    setKPI("attempts", compactNum(s.total_attempts));
+    setKPI("accuracy", s.accuracy_pct != null ? s.accuracy_pct + "%" : "–");
   }
+
+  // ── Growth charts ──
+  if (get(1)) renderLineChart("users-day", get(1), "unique_users", "users", "var(--cat-1)");
+  else showCardError("users-day", results[1].reason);
+  if (get(2)) renderLineChart("daily", get(2), "attempts", "questions", "var(--cat-2)");
+  else showCardError("daily", results[2].reason);
+
+  // ── Engagement KPIs ──
+  const engage = get(3);
+  if (engage?.length) {
+    const e = engage[0];
+    setKPI("spu", e.sessions_per_user ?? "–");
+    setKPI("qps", e.avg_questions_per_session ?? "–");
+    setKPI("tpq", e.avg_time_per_question_secs != null ? e.avg_time_per_question_secs + "s" : "–");
+  }
+
+  // ── Engagement charts ──
+  if (get(4)) renderLineChart("sessions-day", get(4), "sessions", "sessions", "var(--cat-4)");
+  else showCardError("sessions-day", results[4].reason);
+  if (get(5)) renderHBarChart("screens", get(5), "screen", "views", null, "var(--cat-3)");
+  else showCardError("screens", results[5].reason);
+
+  // ── Content charts ──
+  if (get(6)) renderDifficultyChart(get(6));
+  else showCardError("difficulty", results[6].reason);
+  if (get(7)) renderAccuracyChart(get(7));
+  else showCardError("accuracy", results[7].reason);
+  if (get(8)) renderHBarChart("course", get(8), "course", "attempts", "accuracy_pct", "var(--cat-1)");
+  else showCardError("course", results[8].reason);
+  if (get(9)) renderHBarChart("module", get(9), "module", "attempts", "accuracy_pct", "var(--cat-1)");
+  else showCardError("module", results[9].reason);
+
+  // ── Retention KPIs ──
+  const ret = get(10);
+  if (ret?.length) {
+    const r = ret[0];
+    const rate = r.first_half_users > 0 ? Math.round(r.retained_users / r.first_half_users * 100) : 0;
+    setKPI("retention", rate + "%");
+    setKPI("fh-users", compactNum(r.first_half_users));
+    setKPI("sh-users", compactNum(r.second_half_users));
+    setKPI("ret-users", compactNum(r.retained_users));
+  }
+
+  // ── Retention charts ──
+  if (get(11)) renderBarChart("frequency", get(11), "frequency_band", "users", "var(--cat-1)");
+  else showCardError("frequency", results[11].reason);
+  if (get(13)) renderHBarChart("features", get(13), "feature", "uses", null, "var(--cat-5)");
+  else showCardError("features", results[13].reason);
+
+  // ── Revenue KPIs ──
+  const funnel = get(12);
+  if (funnel) {
+    const checkout = funnel.find(r => r.eventtype === "checkout_started");
+    const purchase = funnel.find(r => r.eventtype === "purchase_completed");
+    const cCount = checkout?.events ?? 0;
+    const pCount = purchase?.events ?? 0;
+    setKPI("checkouts", compactNum(cCount));
+    setKPI("purchases", compactNum(pCount));
+    setKPI("conversion", cCount > 0 ? Math.round(pCount / cCount * 100) + "%" : "–");
+  }
+
   btn.disabled = false;
 }
 
@@ -483,10 +608,10 @@ function showCardError(card, err) {
 function compactNum(n) {
   if (n == null) return "–";
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
-  if (n >= 10_000)    return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+  if (n >= 10_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
   return n.toLocaleString();
 }
-function setKPI(id, val) { document.getElementById("kpi-" + id).textContent = val; }
+function setKPI(id, val) { const el = document.getElementById("kpi-" + id); if (el) el.textContent = val; }
 function escHtml(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
 
 // ════════════════════════════════════════════════════════════════════
@@ -504,9 +629,7 @@ function toggleTable(card) {
 function buildTable(columns, rows) {
   const ths = columns.map(c => `<th>${escHtml(c.label)}</th>`).join("");
   const trs = rows.map(r => {
-    const tds = columns.map(c => {
-      const v = r[c.key]; return `<td>${v != null ? escHtml(String(v)) : "–"}</td>`;
-    }).join("");
+    const tds = columns.map(c => { const v = r[c.key]; return `<td>${v != null ? escHtml(String(v)) : "–"}</td>`; }).join("");
     return `<tr>${tds}</tr>`;
   }).join("");
   return `<table class="data-table"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
@@ -517,59 +640,53 @@ function buildTable(columns, rows) {
 // ════════════════════════════════════════════════════════════════════
 const tooltipEl = document.getElementById("tooltip");
 function showTooltip(evt, html) {
-  tooltipEl.innerHTML = html;
-  tooltipEl.classList.add("show");
+  tooltipEl.innerHTML = html; tooltipEl.classList.add("show");
   const r = tooltipEl.getBoundingClientRect();
   let x = evt.clientX + 14, y = evt.clientY - 10;
-  if (x + r.width > window.innerWidth - 8)  x = evt.clientX - r.width - 14;
+  if (x + r.width > window.innerWidth - 8) x = evt.clientX - r.width - 14;
   if (y + r.height > window.innerHeight - 8) y = window.innerHeight - r.height - 8;
   if (y < 8) y = 8;
-  tooltipEl.style.left = x + "px";
-  tooltipEl.style.top  = y + "px";
+  tooltipEl.style.left = x + "px"; tooltipEl.style.top = y + "px";
 }
 function hideTooltip() { tooltipEl.classList.remove("show"); }
 
 // ════════════════════════════════════════════════════════════════════
-// CHART RENDERERS
+// SVG HELPERS
 // ════════════════════════════════════════════════════════════════════
 const SVG_NS = "http://www.w3.org/2000/svg";
-function makeSVG(w, h) {
-  const svg = document.createElementNS(SVG_NS, "svg");
-  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
-  svg.setAttribute("class", "chart-svg");
-  svg.setAttribute("role", "img");
-  return svg;
-}
-function svgEl(tag, attrs) {
-  const el = document.createElementNS(SVG_NS, tag);
-  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
-  return el;
-}
-function svgText(x, y, txt, attrs = {}) {
-  const el = svgEl("text", { x, y, ...attrs });
-  el.textContent = txt;
-  return el;
+function makeSVG(w, h) { const s = document.createElementNS(SVG_NS, "svg"); s.setAttribute("viewBox", `0 0 ${w} ${h}`); s.setAttribute("class", "chart-svg"); s.setAttribute("role", "img"); return s; }
+function svgEl(tag, attrs) { const el = document.createElementNS(SVG_NS, tag); for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v); return el; }
+function svgText(x, y, txt, attrs = {}) { const el = svgEl("text", { x, y, ...attrs }); el.textContent = txt; return el; }
+
+function niceScale(lo, hi, maxTicks) {
+  if (hi <= lo) hi = lo + 1;
+  const range = hi - lo, rough = range / maxTicks;
+  const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+  const frac = rough / mag;
+  let nice; if (frac <= 1.5) nice = mag; else if (frac <= 3) nice = 2*mag; else if (frac <= 7) nice = 5*mag; else nice = 10*mag;
+  const ticks = [];
+  for (let t = 0; t <= hi; t += nice) ticks.push(Math.round(t * 1000) / 1000);
+  if (ticks[ticks.length - 1] < hi) ticks.push(ticks[ticks.length - 1] + nice);
+  return ticks;
 }
 
-// ── Daily attempts line chart ────────────────────────────────────
-function renderDailyChart(data) {
-  const container = document.getElementById("chart-daily");
-  const tableWrap = document.getElementById("table-daily");
-  if (!data || !data.length) {
-    container.innerHTML = '<div class="empty-state">No attempt data for this range</div>';
-    tableWrap.innerHTML = ""; return;
-  }
+// ════════════════════════════════════════════════════════════════════
+// CHART: LINE (reusable for daily users, attempts, sessions)
+// ════════════════════════════════════════════════════════════════════
+function renderLineChart(card, data, valKey, valLabel, color) {
+  const container = document.getElementById("chart-" + card);
+  const tableWrap = document.getElementById("table-" + card);
+  if (!data?.length) { container.innerHTML = '<div class="empty-state">No data for this range</div>'; tableWrap.innerHTML = ""; return; }
   data.sort((a, b) => `${a.year}-${a.month}-${a.day}`.localeCompare(`${b.year}-${b.month}-${b.day}`));
   const labels = data.map(d => `${d.day}/${d.month}`);
-  const values = data.map(d => d.attempts);
+  const values = data.map(d => d[valKey]);
   const maxVal = Math.max(...values, 1);
 
-  const W = 520, H = 220, ml = 48, mr = 16, mt = 12, mb = 32;
+  const W = 520, H = 200, ml = 48, mr = 16, mt = 12, mb = 32;
   const pw = W - ml - mr, ph = H - mt - mb;
   const svg = makeSVG(W, H);
-  svg.setAttribute("aria-label", "Daily attempts line chart");
 
-  const yTicks = niceScale(0, maxVal, 5);
+  const yTicks = niceScale(0, maxVal, 4);
   for (const tick of yTicks) {
     const y = mt + ph - (tick / maxVal) * ph;
     svg.appendChild(svgEl("line", { x1: ml, x2: W - mr, y1: y, y2: y, class: "grid-line" }));
@@ -577,82 +694,58 @@ function renderDailyChart(data) {
   }
   svg.appendChild(svgEl("line", { x1: ml, x2: W - mr, y1: mt + ph, y2: mt + ph, class: "axis-line" }));
 
-  const pts = values.map((v, i) => ({
-    x: ml + (i / Math.max(values.length - 1, 1)) * pw,
-    y: mt + ph - (v / maxVal) * ph, v, label: labels[i]
-  }));
+  const pts = values.map((v, i) => ({ x: ml + (i / Math.max(values.length - 1, 1)) * pw, y: mt + ph - (v / maxVal) * ph, v, label: labels[i] }));
 
-  // Area fill
   if (pts.length > 1) {
     let areaD = `M ${pts[0].x} ${pts[0].y}`;
     for (let i = 1; i < pts.length; i++) areaD += ` L ${pts[i].x} ${pts[i].y}`;
     areaD += ` L ${pts[pts.length-1].x} ${mt+ph} L ${pts[0].x} ${mt+ph} Z`;
-    svg.appendChild(svgEl("path", { d: areaD, fill: "var(--cat-1)", opacity: "0.1" }));
-  }
-  // Line
-  if (pts.length > 1) {
+    svg.appendChild(svgEl("path", { d: areaD, fill: color, opacity: "0.1" }));
     let pathD = `M ${pts[0].x} ${pts[0].y}`;
     for (let i = 1; i < pts.length; i++) pathD += ` L ${pts[i].x} ${pts[i].y}`;
-    svg.appendChild(svgEl("path", { d: pathD, class: "data-line", stroke: "var(--cat-1)" }));
+    svg.appendChild(svgEl("path", { d: pathD, class: "data-line", stroke: color }));
   }
-  // Dots
-  for (const p of pts) {
-    svg.appendChild(svgEl("circle", { cx: p.x, cy: p.y, r: 4, fill: "var(--cat-1)", class: "data-dot" }));
-  }
-  // End label
+  for (const p of pts) svg.appendChild(svgEl("circle", { cx: p.x, cy: p.y, r: 4, fill: color, class: "data-dot" }));
   if (pts.length) {
     const last = pts[pts.length - 1];
-    svg.appendChild(svgText(last.x + 6, last.y + 4, compactNum(last.v), {
-      class: "axis-label", fill: "var(--ink-secondary)", "font-weight": "600"
-    }));
+    svg.appendChild(svgText(last.x + 6, last.y + 4, compactNum(last.v), { class: "axis-label", fill: "var(--ink-secondary)", "font-weight": "600" }));
   }
-  // X labels
-  const skip = Math.ceil(labels.length / 12);
-  for (let i = 0; i < pts.length; i += skip) {
-    svg.appendChild(svgText(pts[i].x, mt + ph + 18, labels[i], { "text-anchor": "middle", class: "axis-label" }));
-  }
-  // Hover
+  const skip = Math.ceil(labels.length / 10);
+  for (let i = 0; i < pts.length; i += skip) svg.appendChild(svgText(pts[i].x, mt + ph + 18, labels[i], { "text-anchor": "middle", class: "axis-label" }));
+
   const hitW = Math.max(pw / pts.length, 24);
   for (const p of pts) {
     const hit = svgEl("rect", { x: p.x - hitW/2, y: mt, width: hitW, height: ph, fill: "transparent" });
     hit.addEventListener("pointermove", e => showTooltip(e,
       `<div class="tooltip-title">${escHtml(p.label)}</div>` +
-      `<div class="tooltip-row"><span class="tooltip-key" style="background:var(--cat-1)"></span>` +
-      `<span class="tooltip-value">${compactNum(p.v)}</span> <span class="tooltip-label">attempts</span></div>`
-    ));
+      `<div class="tooltip-row"><span class="tooltip-key" style="background:${color}"></span>` +
+      `<span class="tooltip-value">${compactNum(p.v)}</span> <span class="tooltip-label">${valLabel}</span></div>`));
     hit.addEventListener("pointerleave", hideTooltip);
     svg.appendChild(hit);
   }
-  container.innerHTML = "";
-  container.appendChild(svg);
-  tableWrap.innerHTML = buildTable(
-    [{ key: "date", label: "Date" }, { key: "attempts", label: "Attempts" }],
-    data.map(d => ({ date: `${d.day}/${d.month}/${d.year}`, attempts: d.attempts }))
-  );
+  container.innerHTML = ""; container.appendChild(svg);
+  tableWrap.innerHTML = buildTable([{ key: "date", label: "Date" }, { key: valKey, label: valLabel }],
+    data.map(d => ({ date: `${d.day}/${d.month}/${d.year}`, [valKey]: d[valKey] })));
 }
 
-// ── Accuracy distribution bar chart ─────────────────────────────
-function renderAccuracyChart(data) {
-  const container = document.getElementById("chart-accuracy");
-  const tableWrap = document.getElementById("table-accuracy");
-  if (!data || !data.length) {
-    container.innerHTML = '<div class="empty-state">No accuracy data for this range</div>';
-    tableWrap.innerHTML = ""; return;
-  }
-  const bandOrder = ["0-19%","20-39%","40-59%","60-79%","80-100%"];
-  const sorted = bandOrder.map(b => data.find(d => d.band === b) || { band: b, sessions: 0 });
-  const labels = sorted.map(d => d.band);
-  const values = sorted.map(d => d.sessions);
+// ════════════════════════════════════════════════════════════════════
+// CHART: VERTICAL BAR (accuracy dist, user frequency)
+// ════════════════════════════════════════════════════════════════════
+function renderBarChart(card, data, labelKey, valKey, color) {
+  const container = document.getElementById("chart-" + card);
+  const tableWrap = document.getElementById("table-" + card);
+  if (!data?.length) { container.innerHTML = '<div class="empty-state">No data</div>'; tableWrap.innerHTML = ""; return; }
+  const labels = data.map(d => d[labelKey]);
+  const values = data.map(d => d[valKey]);
   const maxVal = Math.max(...values, 1);
 
-  const W = 520, H = 220, ml = 48, mr = 16, mt = 12, mb = 32;
+  const W = 520, H = 200, ml = 48, mr = 16, mt = 12, mb = 40;
   const pw = W - ml - mr, ph = H - mt - mb;
-  const barW = Math.min(24, (pw / labels.length) * 0.6);
+  const barW = Math.min(28, (pw / labels.length) * 0.55);
   const gap = pw / labels.length;
   const svg = makeSVG(W, H);
-  svg.setAttribute("aria-label", "Accuracy distribution bar chart");
 
-  const yTicks = niceScale(0, maxVal, 5);
+  const yTicks = niceScale(0, maxVal, 4);
   for (const tick of yTicks) {
     const y = mt + ph - (tick / maxVal) * ph;
     svg.appendChild(svgEl("line", { x1: ml, x2: W - mr, y1: y, y2: y, class: "grid-line" }));
@@ -663,108 +756,124 @@ function renderAccuracyChart(data) {
   for (let i = 0; i < labels.length; i++) {
     const cx = ml + gap * i + gap / 2;
     const barH = (values[i] / maxVal) * ph;
-    svg.appendChild(svgEl("rect", {
-      x: cx - barW/2, y: mt + ph - barH, width: barW, height: Math.max(barH, 1),
-      fill: "var(--cat-1)", rx: 4, ry: 4,
-    }));
-    if (values[i] > 0) {
-      svg.appendChild(svgText(cx, mt + ph - barH - 6, compactNum(values[i]), {
-        "text-anchor": "middle", class: "axis-label", fill: "var(--ink-secondary)", "font-weight": "600", "font-size": "11"
-      }));
-    }
-    svg.appendChild(svgText(cx, mt + ph + 18, labels[i], { "text-anchor": "middle", class: "axis-label" }));
-    const hit = svgEl("rect", { x: cx - Math.max(barW,24)/2, y: mt, width: Math.max(barW,24), height: ph, fill: "transparent" });
+    svg.appendChild(svgEl("rect", { x: cx - barW/2, y: mt + ph - barH, width: barW, height: Math.max(barH, 1), fill: color, rx: 4, ry: 4 }));
+    if (values[i] > 0) svg.appendChild(svgText(cx, mt + ph - barH - 6, compactNum(values[i]), { "text-anchor": "middle", class: "axis-label", fill: "var(--ink-secondary)", "font-weight": "600", "font-size": "11" }));
+    // X label — wrap long labels
+    const lbl = labels[i].length > 10 ? labels[i].replace(/ /g, '\n') : labels[i];
+    svg.appendChild(svgText(cx, mt + ph + 16, labels[i], { "text-anchor": "middle", class: "axis-label", "font-size": "10" }));
+
+    const hit = svgEl("rect", { x: cx - Math.max(barW, 24)/2, y: mt, width: Math.max(barW, 24), height: ph, fill: "transparent" });
     hit.addEventListener("pointermove", e => showTooltip(e,
       `<div class="tooltip-title">${escHtml(labels[i])}</div>` +
-      `<div class="tooltip-row"><span class="tooltip-key" style="background:var(--cat-1)"></span>` +
-      `<span class="tooltip-value">${compactNum(values[i])}</span> <span class="tooltip-label">sessions</span></div>`
-    ));
+      `<div class="tooltip-row"><span class="tooltip-key" style="background:${color}"></span>` +
+      `<span class="tooltip-value">${compactNum(values[i])}</span> <span class="tooltip-label">${valKey}</span></div>`));
     hit.addEventListener("pointerleave", hideTooltip);
     svg.appendChild(hit);
   }
-  container.innerHTML = "";
-  container.appendChild(svg);
-  tableWrap.innerHTML = buildTable(
-    [{ key: "band", label: "Accuracy band" }, { key: "sessions", label: "Sessions" }], sorted
-  );
+  container.innerHTML = ""; container.appendChild(svg);
+  tableWrap.innerHTML = buildTable([{ key: labelKey, label: labelKey }, { key: valKey, label: valKey }], data);
 }
 
-// ── Horizontal bar chart (course / module) ──────────────────────
-function renderHBarChart(card, data, nameKey, valKey, accKey) {
+// ════════════════════════════════════════════════════════════════════
+// CHART: ACCURACY DISTRIBUTION
+// ════════════════════════════════════════════════════════════════════
+function renderAccuracyChart(data) {
+  const bandOrder = ["0-19%","20-39%","40-59%","60-79%","80-100%"];
+  const sorted = bandOrder.map(b => data.find(d => d.band === b) || { band: b, sessions: 0 });
+  renderBarChart("accuracy", sorted, "band", "sessions", "var(--cat-1)");
+}
+
+// ════════════════════════════════════════════════════════════════════
+// CHART: HORIZONTAL BAR (reusable)
+// ════════════════════════════════════════════════════════════════════
+function renderHBarChart(card, data, nameKey, valKey, accKey, color) {
   const container = document.getElementById("chart-" + card);
   const tableWrap = document.getElementById("table-" + card);
-  if (!data || !data.length) {
-    container.innerHTML = '<div class="empty-state">No data for this range</div>';
-    tableWrap.innerHTML = ""; return;
-  }
-  const items = data.slice(0, 12);
+  if (!data?.length) { container.innerHTML = '<div class="empty-state">No data</div>'; tableWrap.innerHTML = ""; return; }
+  const items = data.slice(0, 10);
   const maxVal = Math.max(...items.map(d => d[valKey]), 1);
-  const rowH = 32, labelW = 160;
+  const rowH = 30, labelW = 140;
   const W = 520, ml = labelW + 8, mr = 60, mt = 4;
   const barMaxW = W - ml - mr;
   const H = mt + items.length * rowH + 4;
-  const barH = Math.min(20, rowH - 8);
+  const barH = Math.min(18, rowH - 8);
   const svg = makeSVG(W, H);
-  svg.setAttribute("aria-label", `${card} horizontal bar chart`);
 
   for (let i = 0; i < items.length; i++) {
     const y = mt + i * rowH + rowH / 2;
-    const val = items[i][valKey];
-    const name = items[i][nameKey] || "–";
-    const acc = items[i][accKey];
+    const val = items[i][valKey], name = items[i][nameKey] || "–";
     const bw = (val / maxVal) * barMaxW;
-    const labelText = name.length > 22 ? name.slice(0, 20) + "…" : name;
+    const labelText = name.length > 20 ? name.slice(0, 18) + "…" : name;
 
-    svg.appendChild(svgText(labelW, y + 4, labelText, {
-      "text-anchor": "end", class: "axis-label", fill: "var(--ink-secondary)", "font-size": "12"
-    }));
-    svg.appendChild(svgEl("rect", {
-      x: ml, y: y - barH/2, width: Math.max(bw, 2), height: barH,
-      fill: "var(--cat-1)", rx: 4, ry: 4,
-    }));
-    svg.appendChild(svgText(ml + Math.max(bw, 2) + 6, y + 4, compactNum(val), {
-      class: "axis-label", fill: "var(--ink-secondary)", "font-weight": "600", "font-size": "12"
-    }));
+    svg.appendChild(svgText(labelW, y + 4, labelText, { "text-anchor": "end", class: "axis-label", fill: "var(--ink-secondary)", "font-size": "12" }));
+    svg.appendChild(svgEl("rect", { x: ml, y: y - barH/2, width: Math.max(bw, 2), height: barH, fill: color, rx: 4, ry: 4 }));
+    svg.appendChild(svgText(ml + Math.max(bw, 2) + 6, y + 4, compactNum(val), { class: "axis-label", fill: "var(--ink-secondary)", "font-weight": "600", "font-size": "12" }));
 
     const hit = svgEl("rect", { x: 0, y: y - rowH/2, width: W, height: rowH, fill: "transparent" });
-    const fullName = name, accVal = acc;
+    const acc = items[i][accKey];
     hit.addEventListener("pointermove", e => {
-      let html = `<div class="tooltip-title">${escHtml(fullName)}</div>` +
-        `<div class="tooltip-row"><span class="tooltip-key" style="background:var(--cat-1)"></span>` +
-        `<span class="tooltip-value">${compactNum(val)}</span> <span class="tooltip-label">attempts</span></div>`;
-      if (accVal != null) html += `<div class="tooltip-row"><span class="tooltip-key" style="background:var(--cat-3)"></span>` +
-        `<span class="tooltip-value">${accVal}%</span> <span class="tooltip-label">accuracy</span></div>`;
+      let html = `<div class="tooltip-title">${escHtml(name)}</div>` +
+        `<div class="tooltip-row"><span class="tooltip-key" style="background:${color}"></span>` +
+        `<span class="tooltip-value">${compactNum(val)}</span> <span class="tooltip-label">${valKey}</span></div>`;
+      if (acc != null) html += `<div class="tooltip-row"><span class="tooltip-key" style="background:var(--cat-3)"></span>` +
+        `<span class="tooltip-value">${acc}%</span> <span class="tooltip-label">accuracy</span></div>`;
       showTooltip(e, html);
     });
     hit.addEventListener("pointerleave", hideTooltip);
     svg.appendChild(hit);
   }
-  container.innerHTML = "";
-  container.appendChild(svg);
-  tableWrap.innerHTML = buildTable([
-    { key: nameKey, label: card === "course" ? "Course" : "Module" },
-    { key: valKey, label: "Attempts" },
-    { key: "correct", label: "Correct" },
-    { key: accKey, label: "Accuracy %" }
-  ], items);
+  container.innerHTML = ""; container.appendChild(svg);
+  const cols = [{ key: nameKey, label: nameKey }, { key: valKey, label: valKey }];
+  if (accKey) cols.push({ key: accKey, label: "Accuracy %" });
+  tableWrap.innerHTML = buildTable(cols, items);
 }
 
 // ════════════════════════════════════════════════════════════════════
-// NICE SCALE
+// CHART: MODULE DIFFICULTY (horizontal bars coloured by accuracy)
 // ════════════════════════════════════════════════════════════════════
-function niceScale(lo, hi, maxTicks) {
-  if (hi <= lo) hi = lo + 1;
-  const range = hi - lo;
-  const rough = range / maxTicks;
-  const mag = Math.pow(10, Math.floor(Math.log10(rough)));
-  const frac = rough / mag;
-  let nice;
-  if (frac <= 1.5) nice = mag; else if (frac <= 3) nice = 2*mag;
-  else if (frac <= 7) nice = 5*mag; else nice = 10*mag;
-  const ticks = [];
-  for (let t = 0; t <= hi; t += nice) ticks.push(Math.round(t*1000)/1000);
-  if (ticks[ticks.length-1] < hi) ticks.push(ticks[ticks.length-1] + nice);
-  return ticks;
+function renderDifficultyChart(data) {
+  const container = document.getElementById("chart-difficulty");
+  const tableWrap = document.getElementById("table-difficulty");
+  if (!data?.length) { container.innerHTML = '<div class="empty-state">No data (need ≥5 attempts per module)</div>'; tableWrap.innerHTML = ""; return; }
+  const items = data.slice(0, 10);
+  const rowH = 30, labelW = 100, accBarW = 200;
+  const W = 520, ml = labelW + 8, mr = 16, mt = 4;
+  const H = mt + items.length * rowH + 4;
+  const barH = 16;
+  const svg = makeSVG(W, H);
+
+  for (let i = 0; i < items.length; i++) {
+    const y = mt + i * rowH + rowH / 2;
+    const { module: mod, accuracy_pct: acc, attempts, avg_time_secs: avgT } = items[i];
+    const labelText = (mod || "–").length > 14 ? (mod || "–").slice(0, 12) + "…" : (mod || "–");
+    // Accuracy bar: full width = 100%
+    const bw = (acc / 100) * accBarW;
+    // Color: red (<40), yellow (40-70), green (>70)
+    const barColor = acc < 40 ? "var(--bad)" : acc < 70 ? "var(--cat-4)" : "var(--good)";
+
+    svg.appendChild(svgText(labelW, y + 4, labelText, { "text-anchor": "end", class: "axis-label", fill: "var(--ink-secondary)", "font-size": "12" }));
+    // Background track
+    svg.appendChild(svgEl("rect", { x: ml, y: y - barH/2, width: accBarW, height: barH, fill: "var(--grid)", rx: 4, ry: 4 }));
+    // Accuracy fill
+    svg.appendChild(svgEl("rect", { x: ml, y: y - barH/2, width: Math.max(bw, 2), height: barH, fill: barColor, rx: 4, ry: 4 }));
+    // Label
+    svg.appendChild(svgText(ml + accBarW + 8, y + 4, `${acc}%`, { class: "axis-label", fill: "var(--ink-secondary)", "font-weight": "600", "font-size": "12" }));
+    svg.appendChild(svgText(ml + accBarW + 52, y + 4, `${avgT}s avg`, { class: "axis-label", fill: "var(--ink-muted)", "font-size": "10" }));
+
+    const hit = svgEl("rect", { x: 0, y: y - rowH/2, width: W, height: rowH, fill: "transparent" });
+    hit.addEventListener("pointermove", e => showTooltip(e,
+      `<div class="tooltip-title">${escHtml(mod || "–")}</div>` +
+      `<div class="tooltip-row"><span class="tooltip-value">${acc}%</span> <span class="tooltip-label">accuracy</span></div>` +
+      `<div class="tooltip-row"><span class="tooltip-value">${compactNum(attempts)}</span> <span class="tooltip-label">attempts</span></div>` +
+      `<div class="tooltip-row"><span class="tooltip-value">${avgT}s</span> <span class="tooltip-label">avg time</span></div>`));
+    hit.addEventListener("pointerleave", hideTooltip);
+    svg.appendChild(hit);
+  }
+  container.innerHTML = ""; container.appendChild(svg);
+  tableWrap.innerHTML = buildTable([
+    { key: "module", label: "Module" }, { key: "accuracy_pct", label: "Accuracy %" },
+    { key: "attempts", label: "Attempts" }, { key: "avg_time_secs", label: "Avg time (s)" }
+  ], items);
 }
 </script>
 </body>
